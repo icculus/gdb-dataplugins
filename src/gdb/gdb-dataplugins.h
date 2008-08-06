@@ -32,6 +32,8 @@
 extern "C" {
 #endif
 
+#define GDB_DATAPLUGIN_INTERFACE_VERSION 1
+
 /* callback for outputting data from a data plugin. printf_unfiltered(). */
 typedef void (*GDB_dataplugin_printfn)(const char *fmt, ...);
 
@@ -83,8 +85,14 @@ typedef struct
 /* the entry point into a data plugin shared library. */
 typedef void (*GDB_dataplugin_entry)(const GDB_dataplugin_entry_funcs *);
 
+/* ignore this. Just some macro magic. */
+#define __GDB_DATAPLUGIN_ENTRY3(fn,ver) fn##_##ver
+#define __GDB_DATAPLUGIN_ENTRY2(fn,ver) __GDB_DATAPLUGIN_ENTRY3(fn,ver)
+
 /* name of the function in the data plugin to use for the entry point. */
-#define GDB_DATAPLUGIN_ENTRY GDB_dataview_plugin_entry
+#define GDB_DATAPLUGIN_ENTRY __GDB_DATAPLUGIN_ENTRY2( \
+                                            GDB_dataview_plugin_entry, \
+                                            GDB_DATAPLUGIN_INTERFACE_VERSION)
 
 /* just so this is forced to be extern "C" in the plugin itself... */
 void GDB_DATAPLUGIN_ENTRY(const GDB_dataplugin_entry_funcs *);
