@@ -4,7 +4,7 @@
 static void view_hello(void *ptr, const GDB_dataplugin_funcs *f)
 {
     Hello hello;
-    f->warning("warning from inside %s:%d ...", __FUNCTION__, __LINE__);
+    f->warning("warning from inside %s, %s:%d ...", __FUNCTION__, __FILE__, __LINE__);
     if (f->readmem(ptr, &hello, sizeof (Hello)) != 0) return;
     if ((hello.name = f->readstr(hello.name)) == 0) return;
     f->print("This Hello says heya to %s, %d times!\n", hello.name, hello.times);
