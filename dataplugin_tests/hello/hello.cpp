@@ -1,11 +1,5 @@
 #include <stdio.h>
-
-class Hello
-{
-public:
-	char *name;
-	int times;
-};
+#include "hello.h"
 
 int main(void)
 {
