@@ -85,3 +85,5 @@ void GDB_DATAPLUGIN_ENTRY(GDB_dataplugin_register r, GDB_dataplugin_warning w)
     r("SDL_Surface", view_SDL_Surface);
 }
 
+/* end of viewsdl.c ... */
+

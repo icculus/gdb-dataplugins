@@ -9,5 +9,5 @@ clean:
 viewsdl.so: viewsdl.c
 	gcc -o viewsdl.so -shared -fPIC -Wall -O0 -g viewsdl.c -I../../src/gdb $(SDLFLAGS)
 
-
+# end of Makefile ...
 

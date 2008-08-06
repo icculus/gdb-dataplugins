@@ -18,3 +18,5 @@ void GDB_DATAPLUGIN_ENTRY(GDB_dataplugin_register r, GDB_dataplugin_warning w)
     r("Hello", view_hello);
 }
 
+/* end of viewhello.cpp ... */
+

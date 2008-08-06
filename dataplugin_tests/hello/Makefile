@@ -10,3 +10,5 @@ hello: hello.cpp
 viewhello.so: viewhello.cpp
 	g++ -o viewhello.so -shared -fPIC -Wall -O0 -g viewhello.cpp -I../../src/gdb
 
+# end of Makefile ...
+
