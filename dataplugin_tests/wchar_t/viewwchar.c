@@ -30,24 +30,24 @@ static void view_wchar_t_##bits(void *ptr, const GDB_dataplugin_funcs *funcs) \
     funcs->freemem(str); \
 }
 
-VIEW_WCHAR_T_IMPL(16)
+//VIEW_WCHAR_T_IMPL(16)
 VIEW_WCHAR_T_IMPL(32)
-VIEW_WCHAR_T_IMPL(64)
+//VIEW_WCHAR_T_IMPL(64)
 
 void GDB_DATAPLUGIN_ENTRY(const GDB_dataplugin_entry_funcs *funcs)
 {
-    size_t size = 0;
-    if (!funcs->get_type_geometry("wchar_t", &size, NULL))
-        return;
+//    size_t size = 0;
+//    if (!funcs->get_type_geometry("wchar_t", &size, NULL))
+//        return;
 
-    if (size == 2)
-        funcs->register_viewer("wchar_t *", view_wchar_t_16);
-    else if (size == 4)
+//    if (size == 2)
+//        funcs->register_viewer("wchar_t *", view_wchar_t_16);
+//    else if (size == 4)
         funcs->register_viewer("wchar_t *", view_wchar_t_32);
-    else if (size == 8)
-        funcs->register_viewer("wchar_t *", view_wchar_t_64);
-    else
-        funcs->warning("sizeof (wchar_t) is %d ... we only handle 2, 4, 8.");
+//    else if (size == 8)
+//        funcs->register_viewer("wchar_t *", view_wchar_t_64);
+//    else
+//        funcs->warning("sizeof (wchar_t) is %d ... we only handle 2, 4, 8.");
 }
 
 /* end of viewwchar.c ... */
