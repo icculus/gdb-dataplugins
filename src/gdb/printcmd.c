@@ -181,7 +181,10 @@ static htab_t dataplugin_htab = 0;
 static int
 dataplugin_read_memory(void *src, void *dst, int len)
 {
-    return target_read_memory ((CORE_ADDR) src, (gdb_byte *)dst, len);
+    const int rc = target_read_memory ((CORE_ADDR) src, (gdb_byte *)dst, len);
+    if (rc != 0)
+        warning(_("Data plugin failed to read memory from debug process."));
+    return rc;
 }
 
 static char *
@@ -194,6 +197,7 @@ dataplugin_read_string(void *src)
     {
         xfree(retval);
         retval = NULL;
+        warning(_("Data plugin failed to read string from debug process."));
     }
     return retval;
 }
