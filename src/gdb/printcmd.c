@@ -47,6 +47,18 @@
 #include "tui/tui.h"		/* For tui_active et.al.   */
 #endif
 
+/* !!! FIXME: needs to look for dlopen() support in the configure script. */
+/* !!! FIXME: (and deal with non-dlopen platforms...?) */
+#define SUPPORT_DATA_PLUGINS 1
+
+#if SUPPORT_DATA_PLUGINS
+#include <dlfcn.h>  /* !!! FIXME: support platforms without dlopen(). */
+#include "gdb-dataplugins.h"
+#define GDB_DATAPLUGIN_ENTRY_STR3(x) #x
+#define GDB_DATAPLUGIN_ENTRY_STR2(x) GDB_DATAPLUGIN_ENTRY_STR3(x)
+#define GDB_DATAPLUGIN_ENTRY_STR GDB_DATAPLUGIN_ENTRY_STR2(GDB_DATAPLUGIN_ENTRY)
+#endif
+
 #if defined(__MINGW32__)
 # define USE_PRINTF_I64 1
 # define PRINTF_HAS_LONG_LONG
@@ -160,6 +172,161 @@ void _initialize_printcmd (void);
 
 static void do_one_display (struct display *);
 
+
+
+#if SUPPORT_DATA_PLUGINS
+/* !!! FIXME: need a way to delete the hash at shutdown. just atexit()? */
+static htab_t dataplugin_htab = 0;
+
+static int
+dataplugin_read_memory(void *src, void *dst, int len)
+{
+    return target_read_memory ((CORE_ADDR) src, (gdb_byte *)dst, len);
+}
+
+static char *
+dataplugin_read_string(void *src)
+{
+    char *retval = NULL;
+    int err = 0;
+    int rc = target_read_string ((CORE_ADDR) src, &retval, 1024 * 128, &err);
+    if (err != 0)
+    {
+        xfree(retval);
+        retval = NULL;
+    }
+    return retval;
+}
+
+static void *
+dataplugin_alloc_memory(int len)
+{
+    return xcalloc(1, len);
+}
+
+static void *
+dataplugin_realloc_memory(void *ptr, int len)
+{
+    return xrealloc(ptr, len);
+}
+
+static void
+dataplugin_free_memory(void *ptr)
+{
+    xfree(ptr);
+}
+
+typedef struct
+{
+    const char *typestr;
+    GDB_dataplugin_viewfn fn;
+} dataplugin_hash_data;
+
+static hashval_t
+dataplugin_hash (const void *p)
+{
+    const dataplugin_hash_data *data = (dataplugin_hash_data *) p;
+    return htab_hash_string(data->typestr);
+}
+
+static void
+dataplugin_hash_del(void *p)
+{
+    dataplugin_hash_data *data = (dataplugin_hash_data *) p;
+    xfree((void *) data->typestr);
+    xfree(data);
+}
+
+static int
+dataplugin_hash_eq(const void *a, const void *b)
+{
+    const dataplugin_hash_data *data1 = (dataplugin_hash_data *) a;
+    const dataplugin_hash_data *data2 = (dataplugin_hash_data *) b;
+    return streq(data1->typestr, data2->typestr);
+}
+
+static void
+dataplugin_add_viewer(const char *typestr, GDB_dataplugin_viewfn fn)
+{
+    const dataplugin_hash_data lookup = { typestr, NULL };
+    dataplugin_hash_data **slot = NULL;
+
+    if (!dataplugin_htab)
+    {
+        dataplugin_htab = htab_create_alloc (256, dataplugin_hash,
+                                  dataplugin_hash_eq, dataplugin_hash_del,
+                                  xcalloc, xfree);
+    }
+
+    slot = (dataplugin_hash_data **) htab_find_slot (dataplugin_htab, &lookup, INSERT);
+    if (*slot != NULL)
+        warning(_("Tried to readd data plugin viewer for '%s'"), typestr);
+    else
+    {
+        *slot = xmalloc(sizeof (dataplugin_hash_data));
+        (*slot)->typestr = xstrdup(typestr);
+        (*slot)->fn = fn;
+        printf_filtered(_("Added data plugin viewer for '%s'\n"), typestr);
+    }
+}
+
+static GDB_dataplugin_viewfn
+dataplugin_get_viewer(const char *typestr)
+{
+    const dataplugin_hash_data lookup = { typestr, NULL };
+    dataplugin_hash_data *data = NULL;
+    if ((!dataplugin_htab) || (htab_elements (dataplugin_htab) == 0))
+        return NULL;
+    data = (dataplugin_hash_data *) htab_find (dataplugin_htab, &lookup);
+    return (data) ? data->fn : NULL;
+}
+
+
+/* called in response to "dataplugin" command entered by user at console */
+static void
+dataplugin_command (char *arg, int from_tty)
+{
+    /* !!! FIXME: support platforms without dlopen(). */
+    int new_count = 0;
+    const int start_count = dataplugin_htab ? htab_elements (dataplugin_htab) : 0;
+    const char *entryname = GDB_DATAPLUGIN_ENTRY_STR;
+    GDB_dataplugin_entry entry = 0;
+    void *lib = dlopen(arg, RTLD_NOW | RTLD_LOCAL);
+    if (lib == NULL)
+    {
+        warning(_("dlopen(\"%s\") failed: %s"), arg, dlerror());
+        return;
+    }
+
+    entry = (GDB_dataplugin_entry) dlsym(lib, entryname);
+    if (entry == NULL)
+    {
+        warning(_("dlsym(lib, \"%s\") failed: %s"), entryname, dlerror());
+        dlclose(lib);
+        return;
+    }
+
+    entry(dataplugin_add_viewer, warning);
+
+    new_count = htab_elements (dataplugin_htab);
+    gdb_assert(start_count <= new_count);
+    if (start_count < new_count)
+    {
+        printf_filtered(_("Data plugin added %d viewers.\n"),
+                        new_count - start_count);
+    }
+    else
+    {
+        warning(_("Data plugin added no viewers."));
+        dlclose(lib);
+    }
+
+    /*
+     * !!! FIXME: we're leaking library handles. Maybe store them
+     * !!! FIXME:  in a linked list and close them atexit()?
+     */
+}
+#endif
 
 /* Decode a format specification.  *STRING_PTR should point to it.
    OFORMAT and OSIZE are used as defaults for the format and size
@@ -857,14 +1024,44 @@ print_command_1 (char *exp, int inspect, int voidprint)
 
   if (exp && *exp)
     {
-      struct type *type;
       expr = parse_expression (exp);
       old_chain = make_cleanup (free_current_contents, &expr);
       cleanup = 1;
       val = evaluate_expression (expr);
+
+      #if SUPPORT_DATA_PLUGINS
+      {
+          long dummy = 0;
+          GDB_dataplugin_viewfn viewfn = 0;
+          struct ui_file *memfile = mem_fileopen ();
+          struct cleanup *memfile_chain = make_cleanup_ui_file_delete (memfile);
+          struct type *type = value_type(evaluate_type (expr));
+          char *typestr = NULL;
+          type_print (type, NULL, memfile, 0);
+          typestr = ui_file_xstrdup (memfile, &dummy);
+          do_cleanups (memfile_chain);
+          viewfn = dataplugin_get_viewer(typestr);
+          xfree(typestr);
+          if (viewfn != NULL)
+          {
+            GDB_dataplugin_funcs funcs;
+            funcs.warning = warning;
+            funcs.print = printf_unfiltered;
+            funcs.readmem = dataplugin_read_memory;
+            funcs.readstr = dataplugin_read_string;
+            funcs.allocmem = dataplugin_alloc_memory;
+            funcs.reallocmem = dataplugin_realloc_memory;
+            funcs.freemem = dataplugin_free_memory;
+            viewfn((void *) VALUE_ADDRESS(val), &funcs);
+            do_cleanups (old_chain);
+            inspect_it = 0;
+            return;
+          }
+      }
+      #endif
     }
   else
-    val = access_value_history (0);
+      val = access_value_history (0);
 
   if (voidprint || (val && value_type (val) &&
 		    TYPE_CODE (value_type (val)) != TYPE_CODE_VOID))
@@ -2266,6 +2463,13 @@ _initialize_printcmd (void)
   struct cmd_list_element *c;
 
   current_display_number = -1;
+
+#if SUPPORT_DATA_PLUGINS
+  c = add_com ("dataplugin", class_vars, dataplugin_command, _("\
+Load a data visualization plugin: dataplugin FILENAME\n\
+Load the shared library FILENAME to handle viewing of specific data types."));
+  set_cmd_completer (c, filename_completer);
+#endif
 
   add_info ("address", address_info,
 	    _("Describe where symbol SYM is stored."));
