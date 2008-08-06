@@ -918,18 +918,37 @@ target_translate_tls_address (struct objfile *objfile, CORE_ADDR offset)
 int
 target_read_string (CORE_ADDR memaddr, char **string, int len, int *errnop)
 {
+  return target_read_string_multibyte(memaddr, string, len, errnop, 1);
+}
+
+/* target_read_string_multibyte -- functions just like target_read_string,
+   but you can specify the size of a character. This means you can use it
+   with wchar_t strings, etc, and the end of the string has to be
+   CHARSIZE null bytes in a row. target_read_string just calls this with
+   CHARSIZE set to 1. */
+
+int
+target_read_string_multibyte (CORE_ADDR memaddr, char **string, int len, int *errnop, int charsize)
+{
   int tlen, origlen, offset, i;
-  gdb_byte buf[4];
+  gdb_byte buf[8];
   int errcode = 0;
-  char *buffer;
+  int nullcount = 0;
+  char *buffer = 0;
   int buffer_allocated;
   char *bufptr;
   unsigned int nbytes_read = 0;
 
+  if ((charsize < 1) || (charsize > sizeof (buf)))
+  {
+    errcode = EIO;
+    goto done;
+  }
+
   gdb_assert (string);
 
   /* Small for testing.  */
-  buffer_allocated = 4;
+  buffer_allocated = 8;
   buffer = xmalloc (buffer_allocated);
   bufptr = buffer;
 
@@ -937,10 +956,10 @@ target_read_string (CORE_ADDR memaddr, char **string, int len, int *errnop)
 
   while (len > 0)
     {
-      tlen = MIN (len, 4 - (memaddr & 3));
-      offset = memaddr & 3;
+      tlen = MIN (len, 8 - (memaddr & 7));
+      offset = memaddr & 7;
 
-      errcode = target_read_memory (memaddr & ~3, buf, sizeof buf);
+      errcode = target_read_memory (memaddr & ~7, buf, sizeof buf);
       if (errcode != 0)
 	{
 	  /* The transfer request might have crossed the boundary to an
@@ -967,8 +986,16 @@ target_read_string (CORE_ADDR memaddr, char **string, int len, int *errnop)
 	  *bufptr++ = buf[i + offset];
 	  if (buf[i + offset] == '\000')
 	    {
-	      nbytes_read += i + 1;
-	      goto done;
+	      nullcount++;
+	      if (nullcount == charsize)
+	        {
+	          nbytes_read += i + 1;
+	          goto done;
+	        }
+	    }
+	  else
+	    {
+	      nullcount = 0;
 	    }
 	}
 

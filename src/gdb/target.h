@@ -635,6 +635,8 @@ extern void target_resume (ptid_t ptid, int step, enum target_signal signal);
 
 extern DCACHE *target_dcache;
 
+extern int target_read_string_multibyte (CORE_ADDR, char **, int, int *, int);
+
 extern int target_read_string (CORE_ADDR, char **, int, int *);
 
 extern int target_read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len);

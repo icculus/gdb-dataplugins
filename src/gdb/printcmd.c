@@ -187,12 +187,12 @@ dataplugin_read_memory(void *src, void *dst, int len)
     return rc;
 }
 
-static char *
-dataplugin_read_string(void *src)
+static void *
+dataplugin_read_string(void *src, int charlen)
 {
     char *retval = NULL;
     int err = 0;
-    int rc = target_read_string ((CORE_ADDR) src, &retval, 1024 * 128, &err);
+    int rc = target_read_string_multibyte ((CORE_ADDR) src, &retval, 1024 * 128, &err, charlen);
     if (err != 0)
     {
         xfree(retval);

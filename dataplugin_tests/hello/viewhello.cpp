@@ -11,7 +11,8 @@ static void view_hello(void *ptr, const GDB_dataplugin_funcs *funcs)
     if (funcs->readmem(ptr, &hello, sizeof (Hello)) != 0)
         return;
 
-    if ((hello.name = funcs->readstr(hello.name, sizeof (char))) == 0)
+    hello.name = (char *) funcs->readstr(hello.name, sizeof (char));
+    if (hello.name == 0)
         return;
 
     funcs->print("This Hello says heya to %s, %d times!\n",

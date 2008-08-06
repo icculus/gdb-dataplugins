@@ -39,7 +39,8 @@ typedef void (*GDB_dataplugin_printfn)(const char *fmt, ...);
 typedef int (*GDB_dataplugin_readmemfn)(void *src, void *dst, int len);
 
 /* callback for reading a null-terminated string from debuggee address space to debugger. */
-typedef char *(*GDB_dataplugin_readstrfn)(void *src);
+/* readstrfn(ptr, sizeof (wchar_t)), for example. */
+typedef void *(*GDB_dataplugin_readstrfn)(void *src, int charsize);
 
 /* callback for allocating memory. */
 typedef void *(*GDB_dataplugin_mallocfn)(int len);
