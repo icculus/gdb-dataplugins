@@ -70,14 +70,23 @@ typedef void (*GDB_dataplugin_viewfn)(void *, const GDB_dataplugin_funcs *);
 /* callback for registering a viewer for a specific data type. */
 typedef void (*GDB_dataplugin_register)(const char *, GDB_dataplugin_viewfn);
 
+typedef struct
+{
+    GDB_dataplugin_warning warning;
+    GDB_dataplugin_mallocfn allocmem;
+    GDB_dataplugin_reallocfn reallocmem;
+    GDB_dataplugin_freefn freemem;
+    GDB_dataplugin_register register_viewer;
+} GDB_dataplugin_entry_funcs;
+
 /* the entry point into a data plugin shared library. */
-typedef void (*GDB_dataplugin_entry)(GDB_dataplugin_register, GDB_dataplugin_warning);
+typedef void (*GDB_dataplugin_entry)(const GDB_dataplugin_entry_funcs *);
 
 /* name of the function in the data plugin to use for the entry point. */
 #define GDB_DATAPLUGIN_ENTRY GDB_dataview_plugin_entry
 
 /* just so this is forced to be extern "C" in the plugin itself... */
-void GDB_DATAPLUGIN_ENTRY(GDB_dataplugin_register, GDB_dataplugin_warning);
+void GDB_DATAPLUGIN_ENTRY(const GDB_dataplugin_entry_funcs *);
 
 #ifdef __cplusplus
 }

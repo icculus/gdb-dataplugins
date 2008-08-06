@@ -285,6 +285,26 @@ dataplugin_get_viewer(const char *typestr)
     return (data) ? data->fn : NULL;
 }
 
+static const GDB_dataplugin_funcs dataplugin_funcs =
+{
+    warning,
+    printf_unfiltered,
+    dataplugin_read_memory,
+    dataplugin_read_string,
+    dataplugin_alloc_memory,
+    dataplugin_realloc_memory,
+    dataplugin_free_memory,
+};
+
+static const GDB_dataplugin_entry_funcs dataplugin_entry_funcs =
+{
+    warning,
+    dataplugin_alloc_memory,
+    dataplugin_realloc_memory,
+    dataplugin_free_memory,
+    dataplugin_add_viewer,
+};
+
 
 /* called in response to "dataplugin" command entered by user at console */
 static void
@@ -310,7 +330,7 @@ dataplugin_command (char *arg, int from_tty)
         return;
     }
 
-    entry(dataplugin_add_viewer, warning);
+    entry(&dataplugin_entry_funcs);
 
     new_count = htab_elements (dataplugin_htab);
     gdb_assert(start_count <= new_count);
@@ -330,7 +350,9 @@ dataplugin_command (char *arg, int from_tty)
      * !!! FIXME:  in a linked list and close them atexit()?
      */
 }
+
 #endif
+
 
 /* Decode a format specification.  *STRING_PTR should point to it.
    OFORMAT and OSIZE are used as defaults for the format and size
@@ -1048,17 +1070,9 @@ print_command_1 (char *exp, int inspect, int voidprint)
           xfree(typestr);
           if (viewfn != NULL)
           {
-            GDB_dataplugin_funcs funcs;
-            funcs.warning = warning;
-            funcs.print = printf_unfiltered;
-            funcs.readmem = dataplugin_read_memory;
-            funcs.readstr = dataplugin_read_string;
-            funcs.allocmem = dataplugin_alloc_memory;
-            funcs.reallocmem = dataplugin_realloc_memory;
-            funcs.freemem = dataplugin_free_memory;
             if (fmt.format)
                 warning(_("using data visualization plugin; formatters are ignored."));
-            viewfn((void *) VALUE_ADDRESS(val), &funcs);
+            viewfn((void *) VALUE_ADDRESS(val), &dataplugin_funcs);
             do_cleanups (old_chain);
             inspect_it = 0;
             return;

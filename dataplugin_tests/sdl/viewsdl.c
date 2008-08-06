@@ -80,9 +80,9 @@ static void view_SDL_Surface(void *ptr, const GDB_dataplugin_funcs *f)
 }
 
 
-void GDB_DATAPLUGIN_ENTRY(GDB_dataplugin_register r, GDB_dataplugin_warning w)
+void GDB_DATAPLUGIN_ENTRY(const GDB_dataplugin_entry_funcs *funcs)
 {
-    r("SDL_Surface", view_SDL_Surface);
+    funcs->register_viewer("SDL_Surface", view_SDL_Surface);
 }
 
 /* end of viewsdl.c ... */

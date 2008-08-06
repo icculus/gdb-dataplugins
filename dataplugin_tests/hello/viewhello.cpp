@@ -1,21 +1,30 @@
 #include "gdb-dataplugins.h"
 #include "hello.h"
 
-static void view_hello(void *ptr, const GDB_dataplugin_funcs *f)
+static void view_hello(void *ptr, const GDB_dataplugin_funcs *funcs)
 {
     Hello hello;
-    f->warning("warning from inside %s, %s:%d ...", __FUNCTION__, __FILE__, __LINE__);
-    if (f->readmem(ptr, &hello, sizeof (Hello)) != 0) return;
-    if ((hello.name = f->readstr(hello.name)) == 0) return;
-    f->print("This Hello says heya to %s, %d times!\n", hello.name, hello.times);
-    f->freemem(hello.name);
+
+    funcs->warning("warning from inside %s, %s:%d ...",
+                    __FUNCTION__, __FILE__, __LINE__);
+
+    if (funcs->readmem(ptr, &hello, sizeof (Hello)) != 0)
+        return;
+
+    if ((hello.name = funcs->readstr(hello.name, sizeof (char))) == 0)
+        return;
+
+    funcs->print("This Hello says heya to %s, %d times!\n",
+                 hello.name, hello.times);
+
+    funcs->freemem(hello.name);
 }
 
-void GDB_DATAPLUGIN_ENTRY(GDB_dataplugin_register r, GDB_dataplugin_warning w)
+void GDB_DATAPLUGIN_ENTRY(const GDB_dataplugin_entry_funcs *funcs)
 {
-    w("just testing the warning callback");
-    w("another warning, ignore");
-    r("Hello", view_hello);
+    funcs->warning("just testing the warning callback");
+    funcs->warning("another warning, ignore");
+    funcs->register_viewer("Hello", view_hello);
 }
 
 /* end of viewhello.cpp ... */
