@@ -126,11 +126,6 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
   CORE_ADDR addr;
 
   CHECK_TYPEDEF (type);
-
-// doesn't work...
-  /* !!! FIXME: this probably isn't the right place for this. */
-  printf("TYPENAME: '%s'\nTYPETAG: '%s'\n", type->main_type->name, type->main_type->tag_name);
-
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_ARRAY:
