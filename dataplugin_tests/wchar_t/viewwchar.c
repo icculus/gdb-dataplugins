@@ -8,7 +8,10 @@
 #define VIEW_WCHAR_T_IMPL(bits) \
 static void view_wchar_t_##bits(void *ptr, const GDB_dataplugin_funcs *funcs) \
 { \
-    uint##bits##_t *str = (uint##bits##_t *) funcs->readstr(ptr, bits / 8); \
+    wchar_t *wcptr = 0; \
+    uint##bits##_t *str = 0; \
+    if (funcs->readmem(ptr, &wcptr, sizeof (wchar_t *)) != 0) return; \
+    str = (uint##bits##_t *) funcs->readstr(wcptr, bits / 8); \
     if (str == 0) return; \
     if (sizeof (wchar_t) == sizeof (*str)) { \
         funcs->print("(wchar_t *) L\"%ls\"\n", str); \
