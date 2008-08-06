@@ -7,7 +7,7 @@ for feh in * ; do
     if [ -f $feh/Makefile ]; then
         echo $feh ...
         cd $feh
-        make
+        make $*
         cd ..
     fi
 done
