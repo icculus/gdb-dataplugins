@@ -1048,8 +1048,6 @@ print_command_1 (char *exp, int inspect, int voidprint)
           xfree(typestr);
           if (viewfn != NULL)
           {
-            if (fmt.format)
-                warning(_("using data visualization plugin; formatters are ignored."));
             GDB_dataplugin_funcs funcs;
             funcs.warning = warning;
             funcs.print = printf_unfiltered;
@@ -1058,6 +1056,8 @@ print_command_1 (char *exp, int inspect, int voidprint)
             funcs.allocmem = dataplugin_alloc_memory;
             funcs.reallocmem = dataplugin_realloc_memory;
             funcs.freemem = dataplugin_free_memory;
+            if (fmt.format)
+                warning(_("using data visualization plugin; formatters are ignored."));
             viewfn((void *) VALUE_ADDRESS(val), &funcs);
             do_cleanups (old_chain);
             inspect_it = 0;
