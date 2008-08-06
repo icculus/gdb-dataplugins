@@ -1,11 +1,5 @@
 #include "gdb-dataplugins.h"
-
-class Hello
-{
-public:
-	char *name;
-	int times;
-};
+#include "hello.h"
 
 static void view_hello(void *ptr, const GDB_dataplugin_funcs *f)
 {
