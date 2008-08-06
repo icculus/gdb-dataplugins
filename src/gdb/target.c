@@ -933,6 +933,7 @@ target_read_string_multibyte (CORE_ADDR memaddr, char **string, int len, int *er
   int tlen, origlen, offset, i;
   gdb_byte buf[8];
   int errcode = 0;
+  int charbytecount = 0;
   int nullcount = 0;
   char *buffer = 0;
   int buffer_allocated;
@@ -996,6 +997,13 @@ target_read_string_multibyte (CORE_ADDR memaddr, char **string, int len, int *er
 	  else
 	    {
 	      nullcount = 0;
+	    }
+
+	  charbytecount++;
+	  if (charbytecount == charsize)
+	    {
+	      charbytecount = 0;
+	      nullcount = 0;  /* reset count for new character. */
 	    }
 	}
 
