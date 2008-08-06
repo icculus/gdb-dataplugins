@@ -1044,6 +1044,8 @@ print_command_1 (char *exp, int inspect, int voidprint)
           xfree(typestr);
           if (viewfn != NULL)
           {
+            if (fmt.format)
+                warning(_("using data visualization plugin; formatters are ignored."));
             GDB_dataplugin_funcs funcs;
             funcs.warning = warning;
             funcs.print = printf_unfiltered;
