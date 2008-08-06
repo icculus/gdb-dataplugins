@@ -925,7 +925,7 @@ target_read_string (CORE_ADDR memaddr, char **string, int len, int *errnop)
    but you can specify the size of a character. This means you can use it
    with wchar_t strings, etc, and the end of the string has to be
    CHARSIZE null bytes in a row. target_read_string just calls this with
-   CHARSIZE set to 1. */
+   CHARSIZE set to 1. This returns bytes read, not characters! */
 
 int
 target_read_string_multibyte (CORE_ADDR memaddr, char **string, int len, int *errnop, int charsize)

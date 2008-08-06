@@ -192,7 +192,7 @@ dataplugin_read_string(void *src, int charlen)
 {
     char *retval = NULL;
     int err = 0;
-    int rc = target_read_string_multibyte ((CORE_ADDR) src, &retval, 1024 * 128, &err, charlen);
+    target_read_string_multibyte ((CORE_ADDR) src, &retval, 1024 * 128, &err, charlen);
     if (err != 0)
     {
         xfree(retval);
