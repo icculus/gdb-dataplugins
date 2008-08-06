@@ -315,7 +315,11 @@ dataplugin_command (char *arg, int from_tty)
     const int start_count = dataplugin_htab ? htab_elements (dataplugin_htab) : 0;
     const char *entryname = GDB_DATAPLUGIN_ENTRY_STR;
     GDB_dataplugin_entry entry = 0;
-    void *lib = dlopen(arg, RTLD_NOW | RTLD_LOCAL);
+    void *lib = NULL;
+
+    printf_filtered(_("Loading data plugin \"%s\" ...\n"), arg);
+
+    lib = dlopen(arg, RTLD_NOW | RTLD_LOCAL);
     if (lib == NULL)
     {
         warning(_("dlopen(\"%s\") failed: %s"), arg, dlerror());
