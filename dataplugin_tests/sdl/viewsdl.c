@@ -2,7 +2,7 @@
 #include "gdb-dataplugins.h"
 #include "SDL.h"
 
-static void view_SDL_Surface(void *ptr, const GDB_dataplugin_funcs *f)
+static void view_SDL_Surface(void *ptr, const GDB_dataplugin_funcs *funcs)
 {
     SDL_Surface surface;
     SDL_Palette palette;
@@ -10,24 +10,24 @@ static void view_SDL_Surface(void *ptr, const GDB_dataplugin_funcs *f)
     void *pixels = NULL;
     SDL_Color *colors = NULL;
 
-    if (f->readmem(ptr, &surface, sizeof (SDL_Surface)) != 0) return;
-    if (f->readmem(surface.format, &fmt, sizeof (SDL_PixelFormat)) != 0) return;
+    if (funcs->readmem(ptr, &surface, sizeof (SDL_Surface)) != 0) return;
+    if (funcs->readmem(surface.format, &fmt, sizeof (SDL_PixelFormat)) != 0) return;
 
-    pixels = f->allocmem(surface.pitch * surface.h);
-    if (f->readmem(surface.pixels, pixels, surface.pitch * surface.h) != 0) return;
+    pixels = funcs->allocmem(surface.pitch * surface.h);
+    if (funcs->readmem(surface.pixels, pixels, surface.pitch * surface.h) != 0) return;
 
     if (fmt.palette)
     {
-        if (f->readmem(fmt.palette, &palette, sizeof (SDL_Palette)) != 0) return;
-        colors = f->allocmem(sizeof (SDL_Color) * palette.ncolors);
-        f->readmem(palette.colors, colors, sizeof (SDL_Color) * palette.ncolors);
+        if (funcs->readmem(fmt.palette, &palette, sizeof (SDL_Palette)) != 0) return;
+        colors = funcs->allocmem(sizeof (SDL_Color) * palette.ncolors);
+        funcs->readmem(palette.colors, colors, sizeof (SDL_Color) * palette.ncolors);
     }
 
     if (SDL_Init(SDL_INIT_VIDEO) == -1)
-        f->warning("SDL_Init(SDL_INIT_VIDEO) failed: %s", SDL_GetError());
+        funcs->warning("SDL_Init(SDL_INIT_VIDEO) failed: %s", SDL_GetError());
     else if (SDL_SetVideoMode(surface.w, surface.h, 0, 0) == 0)
     {
-        f->warning("SDL_SetVideoMode() failed: %s", SDL_GetError());
+        funcs->warning("SDL_SetVideoMode() failed: %s", SDL_GetError());
         SDL_Quit();
     }
     else
@@ -38,7 +38,7 @@ static void view_SDL_Surface(void *ptr, const GDB_dataplugin_funcs *f)
 		                        fmt.Rmask, fmt.Gmask, fmt.Bmask, fmt.Amask);
 
         if (img == NULL)
-            f->warning("SDL_CreateRGBSurfaceFrom() failed: %s", SDL_GetError());
+            funcs->warning("SDL_CreateRGBSurfaceFrom() failed: %s", SDL_GetError());
         else
         {
             SDL_Event e;
@@ -75,8 +75,8 @@ static void view_SDL_Surface(void *ptr, const GDB_dataplugin_funcs *f)
         SDL_Quit();
     }
 
-    f->freemem(colors);
-    f->freemem(pixels);
+    funcs->freemem(colors);
+    funcs->freemem(pixels);
 }
 
 
