@@ -22,7 +22,7 @@ static void view_wchar_t_##bits(const void *ptr, const GDB_dataplugin_funcs *fun
             len++; \
         wchar_t *cvt = funcs->allocmem(sizeof (wchar_t) * (len+1)); \
         for (i = 0; i < len; i++) \
-            cvt[i] = (wchar_t) str[len]; \
+            cvt[i] = (wchar_t) str[i]; \
         cvt[i] = '\0'; \
         funcs->print("(wchar_t *) L\"%ls\"\n", cvt); \
         funcs->freemem(cvt); \
