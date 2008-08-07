@@ -7,3 +7,5 @@ int main(void)
     return (x != y) ? 0 : 1;
 }
 
+/* end of wchar.c ... */
+

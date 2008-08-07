@@ -8,6 +8,6 @@ int main(void)
     return (wcslen(z.c_str()) != (strlen(x.c_str()) + strlen(y.c_str()))) ? 0 : 1;
 }
 
-/* end of viewstdstr.cpp ... */
+/* end of stdstr.cpp ... */
 
 
