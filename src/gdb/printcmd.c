@@ -179,7 +179,7 @@ static void do_one_display (struct display *);
 static htab_t dataplugin_htab = 0;
 
 static int
-dataplugin_read_memory(void *src, void *dst, int len)
+dataplugin_read_memory(const void *src, void *dst, int len)
 {
     const int rc = target_read_memory ((CORE_ADDR) src, (gdb_byte *)dst, len);
     if (rc != 0)
@@ -188,7 +188,7 @@ dataplugin_read_memory(void *src, void *dst, int len)
 }
 
 static void *
-dataplugin_read_string(void *src, int charlen)
+dataplugin_read_string(const void *src, int charlen)
 {
     char *retval = NULL;
     int err = 0;

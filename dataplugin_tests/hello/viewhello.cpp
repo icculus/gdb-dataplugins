@@ -1,7 +1,7 @@
 #include "gdb-dataplugins.h"
 #include "hello.h"
 
-static void view_hello(void *ptr, const GDB_dataplugin_funcs *funcs)
+static void view_hello(const void *ptr, const GDB_dataplugin_funcs *funcs)
 {
     Hello hello;
 

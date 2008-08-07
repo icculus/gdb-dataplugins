@@ -38,11 +38,11 @@ extern "C" {
 typedef void (*GDB_dataplugin_printfn)(const char *fmt, ...);
 
 /* callback for reading memory from debuggee address space to debugger. */
-typedef int (*GDB_dataplugin_readmemfn)(void *src, void *dst, int len);
+typedef int (*GDB_dataplugin_readmemfn)(const void *src, void *dst, int len);
 
 /* callback for reading a null-terminated string from debuggee address space to debugger. */
 /* readstrfn(ptr, sizeof (wchar_t)), for example. */
-typedef void *(*GDB_dataplugin_readstrfn)(void *src, int charsize);
+typedef void *(*GDB_dataplugin_readstrfn)(const void *src, int charsize);
 
 /* callback for allocating memory. */
 typedef void *(*GDB_dataplugin_mallocfn)(int len);
@@ -68,7 +68,7 @@ typedef struct
 } GDB_dataplugin_funcs;
 
 /* function pointer where data plugins do their work. */
-typedef void (*GDB_dataplugin_viewfn)(void *, const GDB_dataplugin_funcs *);
+typedef void (*GDB_dataplugin_viewfn)(const void *, const GDB_dataplugin_funcs *);
 
 /* callback for registering a viewer for a specific data type. */
 typedef void (*GDB_dataplugin_register)(const char *, GDB_dataplugin_viewfn);

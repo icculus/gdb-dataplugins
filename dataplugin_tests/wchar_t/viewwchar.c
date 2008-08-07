@@ -6,7 +6,7 @@
 
 /* app was built with -fshort-wchar */
 #define VIEW_WCHAR_T_IMPL(bits) \
-static void view_wchar_t_##bits(void *ptr, const GDB_dataplugin_funcs *funcs) \
+static void view_wchar_t_##bits(const void *ptr, const GDB_dataplugin_funcs *funcs) \
 { \
     wchar_t *wcptr = 0; \
     uint##bits##_t *str = 0; \

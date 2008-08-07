@@ -2,7 +2,7 @@
 #include "gdb-dataplugins.h"
 #include "SDL.h"
 
-static void view_SDL_Surface(void *ptr, const GDB_dataplugin_funcs *funcs)
+static void view_SDL_Surface(const void *ptr, const GDB_dataplugin_funcs *funcs)
 {
     SDL_Surface surface;
     SDL_Palette palette;
