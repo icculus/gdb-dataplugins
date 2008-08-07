@@ -17,7 +17,7 @@ static void view_std_string(const void *ptr, const GDB_dataplugin_funcs *funcs)
     if (cstr == 0)
         return;
 
-    funcs->print("(const char *) \"%s\"\n", cstr);
+    funcs->print("(std::string) \"%s\"\n", cstr);
     funcs->freemem(cstr);
 }
 
@@ -33,7 +33,7 @@ static void view_std_wstring(const void *ptr, const GDB_dataplugin_funcs *funcs)
     if (wcstr == 0)
         return;
 
-    funcs->print("(const wchar_t *) \"%ls\"\n", wcstr);
+    funcs->print("(std::wstring) L\"%ls\"\n", wcstr);
     funcs->freemem(wcstr);
 }
 
