@@ -5,4 +5,5 @@ dataplugin_tests/hello/hello
 dataplugin_tests/wchar_t/wchar32
 dataplugin_tests/wchar_t/wchar16
 dataplugin_tests/std_str/stdstr
+dataplugin_tests/linkedlist/linkedlist
 
