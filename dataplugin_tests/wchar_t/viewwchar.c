@@ -41,8 +41,6 @@ void GDB_DATAPLUGIN_ENTRY(const GDB_dataplugin_entry_funcs *funcs)
     if (funcs->getsize("wchar_t", &size) == -1)
         return;
 
-funcs->warning("sizeof (wchar_t) is %d", (int) size);
-
     if (size == 1)
         funcs->register_viewer("wchar_t *", view_wchar_t_8);
     else if (size == 2)
