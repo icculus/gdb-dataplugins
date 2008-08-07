@@ -2,7 +2,7 @@ all: viewwchar.so wchar
 
 .PHONY: clean
 clean:
-	rm -f viewwchar.so
+	rm -f wchar viewwchar.so
 
 wchar: wchar.c
 	gcc -o wchar -Wall -O0 -g wchar.c
