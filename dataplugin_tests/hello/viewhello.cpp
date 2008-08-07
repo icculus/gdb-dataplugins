@@ -5,9 +5,6 @@ static void view_hello(const void *ptr, const GDB_dataplugin_funcs *funcs)
 {
     Hello hello;
 
-    funcs->warning("warning from inside %s, %s:%d ...",
-                    __FUNCTION__, __FILE__, __LINE__);
-
     if (funcs->readmem(ptr, &hello, sizeof (Hello)) != 0)
         return;
 
@@ -23,8 +20,6 @@ static void view_hello(const void *ptr, const GDB_dataplugin_funcs *funcs)
 
 void GDB_DATAPLUGIN_ENTRY(const GDB_dataplugin_entry_funcs *funcs)
 {
-    funcs->warning("just testing the warning callback");
-    funcs->warning("another warning, ignore");
     funcs->register_viewer("Hello", view_hello);
 }
 
