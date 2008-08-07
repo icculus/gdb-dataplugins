@@ -179,6 +179,41 @@ static void do_one_display (struct display *);
 static htab_t dataplugin_htab = 0;
 
 static int
+dataplugin_get_size(const char *_exp, unsigned long *size)
+{
+    int retval = -1;
+
+    if (!_exp)
+        warning(_("Data plugin passed a NULL expression to get_size()"));
+    else if (!size)
+        warning(_("Data plugin passed a NULL size pointer to get_size()"));
+    else
+    {
+        char *exp = xstrdup(_exp);  /* so we're not const... */
+        struct expression *expr = parse_expression (exp);
+        struct cleanup *old_chain = make_cleanup (free_current_contents, &expr);
+        struct value *value = evaluate_type (expr);
+        if (value == NULL)
+            warning(_("Data plugin couldn't parse expression '%s'"), exp);
+        else
+        {
+            struct type *type = value_type (value);
+            if (type == NULL)
+                warning(_("Data plugin couldn't find type '%s' for get_size()"), exp);
+            else
+            {
+                *size = TYPE_LENGTH (type);
+                retval = 0;  /* success! */
+            }
+        }
+        do_cleanups (old_chain);
+        xfree(exp);
+    }
+
+    return retval;
+}
+
+static int
 dataplugin_read_memory(const void *src, void *dst, int len)
 {
     const int rc = target_read_memory ((CORE_ADDR) src, (gdb_byte *)dst, len);
@@ -289,6 +324,7 @@ static const GDB_dataplugin_funcs dataplugin_funcs =
 {
     warning,
     printf_unfiltered,
+    dataplugin_get_size,
     dataplugin_read_memory,
     dataplugin_read_string,
     dataplugin_alloc_memory,
@@ -299,6 +335,7 @@ static const GDB_dataplugin_funcs dataplugin_funcs =
 static const GDB_dataplugin_entry_funcs dataplugin_entry_funcs =
 {
     warning,
+    dataplugin_get_size,
     dataplugin_alloc_memory,
     dataplugin_realloc_memory,
     dataplugin_free_memory,

@@ -30,24 +30,29 @@ static void view_wchar_t_##bits(const void *ptr, const GDB_dataplugin_funcs *fun
     funcs->freemem(str); \
 }
 
-//VIEW_WCHAR_T_IMPL(16)
-VIEW_WCHAR_T_IMPL(32)
-//VIEW_WCHAR_T_IMPL(64)
+VIEW_WCHAR_T_IMPL(8)   /* can this happen? */
+VIEW_WCHAR_T_IMPL(16)  /* -fshort-wchar, Windows UCS-2. */
+VIEW_WCHAR_T_IMPL(32)  /* Normal Unix UCS-4. */
+VIEW_WCHAR_T_IMPL(64)  /* still waiting for UCS-8.  :)  */
 
 void GDB_DATAPLUGIN_ENTRY(const GDB_dataplugin_entry_funcs *funcs)
 {
-//    size_t size = 0;
-//    if (!funcs->get_type_geometry("wchar_t", &size, NULL))
-//        return;
+    size_t size = 0;
+    if (funcs->getsize("wchar_t", &size) == -1)
+        return;
 
-//    if (size == 2)
-//        funcs->register_viewer("wchar_t *", view_wchar_t_16);
-//    else if (size == 4)
+funcs->warning("sizeof (wchar_t) is %d", (int) size);
+
+    if (size == 1)
+        funcs->register_viewer("wchar_t *", view_wchar_t_8);
+    else if (size == 2)
+        funcs->register_viewer("wchar_t *", view_wchar_t_16);
+    else if (size == 4)
         funcs->register_viewer("wchar_t *", view_wchar_t_32);
-//    else if (size == 8)
-//        funcs->register_viewer("wchar_t *", view_wchar_t_64);
-//    else
-//        funcs->warning("sizeof (wchar_t) is %d ... we only handle 2, 4, 8.");
+    else if (size == 8)
+        funcs->register_viewer("wchar_t *", view_wchar_t_64);
+    else
+        funcs->warning("sizeof (wchar_t) is %d ... we only handle 1, 2, 4, 8.", (int) size);
 }
 
 /* end of viewwchar.c ... */

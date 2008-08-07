@@ -56,10 +56,14 @@ typedef void (*GDB_dataplugin_freefn)(void *ptr);
 /* callback for reporting a problem inside a data plugin. warning(). */
 typedef void (*GDB_dataplugin_warning)(const char *, ...);
 
+/* callback for querying a data type's size. */
+typedef int (*GDB_dataplugin_get_size)(const char *, unsigned long *);
+
 typedef struct
 {
     GDB_dataplugin_warning warning;
     GDB_dataplugin_printfn print;
+    GDB_dataplugin_get_size getsize;
     GDB_dataplugin_readmemfn readmem;
     GDB_dataplugin_readstrfn readstr;
     GDB_dataplugin_mallocfn allocmem;
@@ -76,6 +80,7 @@ typedef void (*GDB_dataplugin_register)(const char *, GDB_dataplugin_viewfn);
 typedef struct
 {
     GDB_dataplugin_warning warning;
+    GDB_dataplugin_get_size getsize;
     GDB_dataplugin_mallocfn allocmem;
     GDB_dataplugin_reallocfn reallocmem;
     GDB_dataplugin_freefn freemem;
