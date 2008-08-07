@@ -3,3 +3,5 @@ build
 dataplugin_tests/*/*.so
 dataplugin_tests/hello/hello
 dataplugin_tests/wchar_t/wchar
+dataplugin_tests/std_str/stdstr
+
