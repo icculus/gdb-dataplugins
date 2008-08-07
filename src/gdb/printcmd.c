@@ -336,7 +336,7 @@ dataplugin_command (char *arg, int from_tty)
 
     entry(&dataplugin_entry_funcs);
 
-    new_count = htab_elements (dataplugin_htab);
+    new_count = dataplugin_htab ? htab_elements (dataplugin_htab) : 0;
     gdb_assert(start_count <= new_count);
     if (start_count < new_count)
     {
