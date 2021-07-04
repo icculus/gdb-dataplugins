@@ -1,4 +1,3 @@
-syntax:glob
 build
 dataplugin_tests/*/*.so
 dataplugin_tests/hello/hello
